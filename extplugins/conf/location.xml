@@ -1,0 +1,9 @@
+<configuration plugin="location">
+    <settings name="commands">
+        <set name='locate'>1</set>
+        <set name='distance'>1</set>
+    </settings>
+    <settings name="settings">
+        <set name="announce">True</set>               <!-- Specify whether to announce the client location on connect [Default = True]-->
+    </settings>
+</configuration>
