@@ -25,7 +25,8 @@ import b3.events
 import urllib2
 import json
 import math
-    
+
+
 class LocationPlugin(b3.plugin.Plugin):
     
     _adminPlugin = None
