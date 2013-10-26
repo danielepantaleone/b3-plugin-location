@@ -4,6 +4,6 @@
         <set name='distance'>1</set>
     </settings>
     <settings name="settings">
-        <set name="announce">True</set>               <!-- Specify whether to announce the client location on connect [Default = True]-->
+        <set name="announce">yes</set>    <!-- whether to announce the client location on connect [default = yes]-->
     </settings>
 </configuration>
