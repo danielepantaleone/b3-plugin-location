@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix - http://www.urbanterror.info'
-__version__ = '1.1'
+__version__ = '1.2'
 
 import b3
 import b3.plugin
@@ -168,6 +168,12 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_CONNECT
         """
+        # if the location has been already
+        # computed exit here so we will not have
+        # multiple accouncements on map change
+        if client.isvar(self, 'location'):
+            return
+
         loc = self.getLocationData(client)
         
         if not loc:
