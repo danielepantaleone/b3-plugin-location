@@ -168,9 +168,9 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_CONNECT
         """
-        # if this client was already connected
-        # on previous map, don't bother
-        if client.authed:
+        # if we already have location data
+        # for this client, don't bother
+        if client.isvar(self, 'location'):
             return
 
         loc = self.getLocationData(client)
