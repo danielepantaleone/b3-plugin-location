@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix - http://www.urbanterror.info'
-__version__ = '1.2'
+__version__ = '1.3'
 
 import b3
 import b3.plugin
@@ -30,8 +30,21 @@ import math
 class LocationPlugin(b3.plugin.Plugin):
     
     _adminPlugin = None
+
     _announce = True
-      
+    _verbose = True
+
+    _messages = dict(
+        connect="""^7%(client)s ^3from ^7%(country)s ^3connected""",
+        connect_city="""^7%(client)s ^3from ^7%(city)s ^3(^7%(country)s^3) connected""",
+        locate="""^7%(client)s ^3is connected from ^7%(country)s""",
+        locate_city="""^7%(client)s ^3is connected from ^7%(city)s ^3(^7%(country)s^3)""",
+        locate_failed="""^7Could not locate ^1%(client)s""",
+        distance="""^7%(client)s ^3is ^7%(distance).2f ^3km away from you""",
+        distance_self="""^7Sorry, I'm not that smart...meh!""",
+        distance_failed="""^7Could not compute distance with ^1%(client)s""",
+    )
+
     def onLoadConfig(self):
         """
         Load plugin configuration
@@ -44,6 +57,26 @@ class LocationPlugin(b3.plugin.Plugin):
         except Exception, e:
             self.error('could not load announce setting: %s' % e)
             self.debug('using default value for announce: %r' % self._announce)
+
+        try:
+            self._verbose = self.config.getboolean('settings', 'verbose')
+            self.debug('loaded verbose setting: %r' % self._verbose)
+        except Exception, e:
+            self.error('could not load verbose setting: %s' % e)
+            self.debug('using default value for verbose: %r' % self._verbose)
+
+        ###
+        # loading in-game messages
+        ###
+
+        for m in self.config.options('messages'):
+
+            try:
+                self._messages[m] = self.config.get('messages', m)
+                self.debug('loaded message [%s]: %s' % (m, self._messages[m]))
+            except Exception, e:
+                self.error('could not load message [%s]: %s' % (m, e))
+                self.debug('using default message for [%s]: %s' % (m, self._messages[m]))
 
     def onStartup(self):
         """
@@ -114,7 +147,7 @@ class LocationPlugin(b3.plugin.Plugin):
         if 'country' not in data:
             self.debug('could not establish in which country is ip %s' % client.ip)
             return None
-        
+
         self.debug("retrieved location data for %s: %r" % (client.name, data))
         return data
 
@@ -173,22 +206,13 @@ class LocationPlugin(b3.plugin.Plugin):
         if client.isvar(self, 'location'):
             return
 
+        # retrieve geolocation data
         loc = self.getLocationData(client)
         
         if not loc:
-            
-            if self._announce and self.console.upTime() > 300:
-                # since we have to announce a connection inform that
-                # a guy from an unknown location connected to the server
-                self.console.say('^7%s ^3from ^7-- ^3connected' % client.name)
-            
+            # if we didn't manage to retrieve
+            # geolocation info just exit here
             return
-
-        # trim off whitespaces since api sometime
-        # returns data without trimming them
-        loc['country'] = loc['country'].strip()
-        if 'city' in loc:
-            loc['city'] = loc['city'].strip()
 
         # store data in the client object so we do
         # not have to query the API on every request
@@ -198,11 +222,13 @@ class LocationPlugin(b3.plugin.Plugin):
         # from the API, print location info in the game chat        
         if self._announce and self.console.upTime() > 300:
 
-            message = '^7%s ^3from ^7%s ^3connected' % (client.name, loc['country'])
-            if 'city' in loc:
-                # if we got a city overwrite previously generated message with a more detailed one
-                message = '^7%s ^3from ^7%s ^3(^7%s^3) connected' % (client.name, loc['city'], loc['country'])
-                
+            if self._verbose and 'city' in loc:
+                # if we got a proper city and we are supposed to display a verbose message
+                message = self._messages['connect_city'] % (client.name, loc['city'], loc['country'])
+            else:
+                # just display basic geolocation info
+                message = self._messages['connect'] % (client.name, loc['country'])
+
             self.console.say(message)
 
     # ######################################################################################### #
@@ -222,23 +248,21 @@ class LocationPlugin(b3.plugin.Plugin):
             return
 
         if not cl.isvar(self, 'location'):
-            cmd.sayLoudOrPM(client, '^7Could not locate ^1%s' % cl.name)
+            cmd.sayLoudOrPM(client, self._messages['locate_failed'] % cl.name)
             return 
         
         # get the client location data
         loc = cl.var(self, 'location').value
-        
-        message = '^7%s ^3is connected from ^7%s' % (cl.name, loc['country'])
-        if 'city' in loc:
-            # if we got a city overwrite previously generated message with a more detailed one
-            message = '^7%s ^3is connected from ^7%s ^3(^7%s^3)' % (cl.name, loc['city'], loc['country'])
-        
+
+        if self._verbose and 'city' in loc:
+            # if we got a proper city and we are supposed to display a verbose message
+            message = self._messages['locate_city'] % (client.name, loc['city'], loc['country'])
+        else:
+            # just display basic geolocation info
+            message = self._messages['locate'] % (client.name, loc['country'])
+
         cmd.sayLoudOrPM(client, message)
-        
-        if 'isp' in loc:
-            # sisplay also the ISP of the client if we got a valid entry
-            cmd.sayLoudOrPM(client, '^3He\'s currently using ^7%s ^3as ISP' % loc['isp'])
-    
+
     def cmd_distance(self, data, client, cmd=None):
         """\
         <client> - Display the world distance between you and the given client
@@ -252,14 +276,14 @@ class LocationPlugin(b3.plugin.Plugin):
             return
         
         if cl == client:
-            cmd.sayLoudOrPM(client, '^7Sorry, I\'m not that smart...meh!')
+            cmd.sayLoudOrPM(client, self._messages['distance_self'])
             return
         
         # compute the distance between the given clients
         # this will return false in case we have data inconsistency
         distance = self.getLocationDistance(client, cl)
         if not distance:
-            cmd.sayLoudOrPM(client, '^7Could not compute distance with ^1%s' % cl.name)
+            cmd.sayLoudOrPM(client, self._messages['distance_failed'] % cl.name)
             return
         
-        cmd.sayLoudOrPM(client, '^7%s ^3is ^7%.2f ^3km away from you' % (cl.name, distance))
+        cmd.sayLoudOrPM(client, self._messages['distance'] % (cl.name, distance))

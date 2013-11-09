@@ -1,9 +1,20 @@
 <configuration plugin="location">
     <settings name="commands">
-        <set name='locate'>1</set>
-        <set name='distance'>1</set>
+        <set name="locate">1</set>
+        <set name="distance">1</set>
+    </settings>
+    <settings name="messages">
+        <set name="connect">^7%(client)s ^3from ^7%(country)s ^3connected</set>
+        <set name="connect_city">^7%(client)s ^3from ^7%(city)s ^3(^7%(country)s^3) connected</set>
+        <set name="locate">^7%(client)s ^3is connected from ^7%(country)s</set>
+        <set name="locate_city">^7%(client)s ^3is connected from ^7%(city)s ^3(^7%(country)s^3)</set>
+        <set name="locate_failed">^7Could not locate ^1%(client)s</set>
+        <set name="distance">^7%(client)s ^3is ^7%(distance).2f ^3km away from you</set>
+        <set name="distance_self">^7Sorry, I'm not that smart...meh!</set>
+        <set name="distance_failed">^7Could not compute distance with ^1%(client)s</set>
     </settings>
     <settings name="settings">
         <set name="announce">yes</set>    <!-- whether to announce the client location on connect [default = yes]-->
+        <set name="verbose">yes</set>     <!-- setting this to 'yes' will show more geolcation info [default = yes] -->
     </settings>
 </configuration>
