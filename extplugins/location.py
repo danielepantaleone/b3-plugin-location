@@ -163,24 +163,24 @@ class LocationPlugin(b3.plugin.Plugin):
             self.debug('could not compute distance: %s has no location data' % cl2.name)
             return False
 
-        location1 = cl1.var(self, 'location').value
-        location2 = cl2.var(self, 'location').value
+        loc1 = cl1.var(self, 'location').value
+        loc2 = cl2.var(self, 'location').value
         
-        if not 'lat' in location1 or not 'lon' in location1:
-            self.debug('could not compute distance: %s has no enough location parameters: %r' % (cl1.name, location1))
+        if not 'lat' in loc1 or not 'lon' in loc1:
+            self.debug('could not compute distance: %s does not have enough location parameters: %r' % (cl1.name, loc1))
             return False
            
-        if not 'lat' in location2 or not 'lon' in location2:
-            self.debug('could not compute distance: %s has no enough location parameters: %r' % (cl2.name, location2))
+        if not 'lat' in loc2 or not 'lon' in loc2:
+            self.debug('could not compute distance: %s does not have enough location parameters: %r' % (cl2.name, loc2))
             return False
         
         # print some verbose logging just for testing purpose
         self.verbose('computing distance between %s and %s' % (cl1.name, cl2.name))
         
-        lat1 = float(location1['lat'])
-        lat2 = float(location2['lat'])
-        lon1 = float(location1['lon'])
-        lon2 = float(location2['lon'])
+        lat1 = float(loc1['lat'])
+        lat2 = float(loc2['lat'])
+        lon1 = float(loc1['lon'])
+        lon2 = float(loc2['lon'])
         
         ###
         # Haversine formula
