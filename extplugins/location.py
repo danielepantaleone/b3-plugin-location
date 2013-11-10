@@ -50,8 +50,6 @@ class LocationPlugin(b3.plugin.Plugin):
         """\
         Load plugin configuration
         """
-        self.verbose('loading config file...')
-
         try:
             self._announce = self.config.getboolean('settings', 'announce')
             self.debug('loaded announce setting: %s' % self._verbose)
@@ -111,6 +109,9 @@ class LocationPlugin(b3.plugin.Plugin):
         
         # register the events needed
         self.registerEvent(b3.events.EVT_CLIENT_CONNECT)
+
+        # notice plugin started
+        self.debug('plugin started')
 
     # ######################################################################################### #
     # ##################################### HANDLE EVENTS ##################################### #        
