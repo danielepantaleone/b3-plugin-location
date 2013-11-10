@@ -17,11 +17,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix - http://www.urbanterror.info'
-__version__ = '1.3'
+__version__ = '1.3.1'
 
 import b3
 import b3.plugin
 import b3.events
+import ConfigParser
 import urllib2
 import json
 import math
@@ -46,37 +47,44 @@ class LocationPlugin(b3.plugin.Plugin):
     )
 
     def onLoadConfig(self):
-        """
+        """\
         Load plugin configuration
         """
-        self.verbose('Loading configuration file...')
-        
+        self.verbose('loading config file...')
+
         try:
             self._announce = self.config.getboolean('settings', 'announce')
-            self.debug('loaded announce setting: %r' % self._announce)
-        except Exception, e:
-            self.error('could not load announce setting: %s' % e)
-            self.debug('using default value for announce: %r' % self._announce)
+            self.debug('loaded announce setting: %s' % self._verbose)
+        except ConfigParser.NoOptionError:
+            self.warning('could not find settings/announce in config file, using default: %s' % self._announce)
+        except ValueError, e:
+            self.error('could not load settings/announce config value: %s' % e)
+            self.debug('using default value (%s) for settings/announce' % self._announce)
 
         try:
             self._verbose = self.config.getboolean('settings', 'verbose')
-            self.debug('loaded verbose setting: %r' % self._verbose)
-        except Exception, e:
-            self.error('could not load verbose setting: %s' % e)
-            self.debug('using default value for verbose: %r' % self._verbose)
+            self.debug('loaded verbose setting: %s' % self._verbose)
+        except ConfigParser.NoOptionError:
+            self.warning('could not find settings/verbose in config file, using default: %s' % self._verbose)
+        except ValueError, e:
+            self.error('could not load settings/verbose config value: %s' % e)
+            self.debug('using default value (%s) for settings/verbose' % self._verbose)
 
         ###
         # loading in-game messages
         ###
 
-        for m in self.config.options('messages'):
+        try:
 
-            try:
+            # read all the message section and store it
+            # into a loccal dictionary overwriting defaults
+            for m in self.config.options('messages'):
                 self._messages[m] = self.config.get('messages', m)
-                self.debug('loaded message [%s]: %s' % (m, self._messages[m]))
-            except Exception, e:
-                self.error('could not load message [%s]: %s' % (m, e))
-                self.debug('using default message for [%s]: %s' % (m, self._messages[m]))
+                self.debug('loaded message (%s): %s' % (m, self._messages[m]))
+
+        except KeyError, e:
+            self.error('could not load messages from configuration file: %s' % e)
+            self.debug('using default messages')
 
     def onStartup(self):
         """
