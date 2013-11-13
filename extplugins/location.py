@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix - http://www.urbanterror.info'
-__version__ = '1.3.2'
+__version__ = '1.3.3'
 
 import b3
 import b3.plugin
@@ -267,10 +267,10 @@ class LocationPlugin(b3.plugin.Plugin):
 
         if self._verbose and 'city' in loc:
             # if we got a proper city and we are supposed to display a verbose message
-            message = self._messages['locate_city'] % {'name': cl.name, 'city': loc['city'], 'country': loc['country']}
+            message = self._messages['locate_city'] % {'client': cl.name, 'city': loc['city'], 'country': loc['country']}
         else:
             # just display basic geolocation info
-            message = self._messages['locate'] % {'name': cl.name, 'country': loc['country']}
+            message = self._messages['locate'] % {'client': cl.name, 'country': loc['country']}
 
         cmd.sayLoudOrPM(client, message)
 
@@ -294,7 +294,7 @@ class LocationPlugin(b3.plugin.Plugin):
         # this will return false in case we have data inconsistency
         distance = self.getLocationDistance(client, cl)
         if not distance:
-            cmd.sayLoudOrPM(client, self._messages['distance_failed'] % {'name': cl.name})
+            cmd.sayLoudOrPM(client, self._messages['distance_failed'] % {'client': cl.name})
             return
         
-        cmd.sayLoudOrPM(client, self._messages['distance'] % {'name': cl.name, 'distance': distance})
+        cmd.sayLoudOrPM(client, self._messages['distance'] % {'client': cl.name, 'distance': distance})
