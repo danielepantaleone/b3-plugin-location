@@ -17,15 +17,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix - http://www.urbanterror.info'
-__version__ = '1.3.3'
+__version__ = '1.3.4'
 
 import b3
 import b3.plugin
 import b3.events
-import ConfigParser
 import urllib2
 import json
 import math
+from ConfigParser import NoOptionError
 
 
 class LocationPlugin(b3.plugin.Plugin):
@@ -53,7 +53,7 @@ class LocationPlugin(b3.plugin.Plugin):
         try:
             self._announce = self.config.getboolean('settings', 'announce')
             self.debug('loaded announce setting: %s' % self._verbose)
-        except ConfigParser.NoOptionError:
+        except NoOptionError:
             self.warning('could not find settings/announce in config file, using default: %s' % self._announce)
         except ValueError, e:
             self.error('could not load settings/announce config value: %s' % e)
@@ -62,7 +62,7 @@ class LocationPlugin(b3.plugin.Plugin):
         try:
             self._verbose = self.config.getboolean('settings', 'verbose')
             self.debug('loaded verbose setting: %s' % self._verbose)
-        except ConfigParser.NoOptionError:
+        except NoOptionError:
             self.warning('could not find settings/verbose in config file, using default: %s' % self._verbose)
         except ValueError, e:
             self.error('could not load settings/verbose config value: %s' % e)
