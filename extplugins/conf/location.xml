@@ -15,6 +15,6 @@
     </settings>
     <settings name="settings">
         <set name="announce">yes</set>    <!-- whether to announce the client location on connect [default = yes]-->
-        <set name="verbose">yes</set>     <!-- setting this to 'yes' will show more geolcation info [default = yes] -->
+        <set name="verbose">yes</set>     <!-- setting this to 'yes' will show more geolocation info [default = yes] -->
     </settings>
 </configuration>
