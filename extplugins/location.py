@@ -72,17 +72,9 @@ class LocationPlugin(b3.plugin.Plugin):
         # loading in-game messages
         ###
 
-        try:
-
-            # read all the message section and store it
-            # into a loccal dictionary overwriting defaults
-            for m in self.config.options('messages'):
-                self._messages[m] = self.config.get('messages', m)
-                self.debug('loaded message (%s): %s' % (m, self._messages[m]))
-
-        except KeyError, e:
-            self.error('could not load messages from configuration file: %s' % e)
-            self.debug('using default messages')
+        for m in self.config.options('messages'):
+            self._messages[m] = self.config.get('messages', m)
+            self.debug('loaded message (%s): %s' % (m, self._messages[m]))
 
     def onStartup(self):
         """
