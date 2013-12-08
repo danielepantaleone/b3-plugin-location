@@ -251,7 +251,7 @@ class LocationPlugin(b3.plugin.Plugin):
             return
 
         if not cl.isvar(self, 'location'):
-            cmd.sayLoudOrPM(client, self._messages['locate_failed'] % {'name': cl.name})
+            cmd.sayLoudOrPM(client, self._messages['locate_failed'] % {'client': cl.name})
             return 
         
         # get the client location data
@@ -259,12 +259,12 @@ class LocationPlugin(b3.plugin.Plugin):
 
         if self._verbose and 'city' in loc:
             # if we got a proper city and we are supposed to display a verbose message
-            message = self._messages['locate_city'] % {'client': cl.name, 'city': loc['city'], 'country': loc['country']}
+            msg = self._messages['locate_city'] % {'client': cl.name, 'city': loc['city'], 'country': loc['country']}
         else:
             # just display basic geolocation info
-            message = self._messages['locate'] % {'client': cl.name, 'country': loc['country']}
+            msg = self._messages['locate'] % {'client': cl.name, 'country': loc['country']}
 
-        cmd.sayLoudOrPM(client, message)
+        cmd.sayLoudOrPM(client, msg)
 
     def cmd_distance(self, data, client, cmd=None):
         """\
