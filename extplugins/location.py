@@ -35,6 +35,8 @@ class LocationPlugin(b3.plugin.Plugin):
     _announce = True
     _verbose = True
 
+    _eventHandle = dict()
+
     _messages = dict(
         connect="""^7%(client)s ^3from ^7%(country)s ^3connected""",
         connect_city="""^7%(client)s ^3from ^7%(city)s ^3(^7%(country)s^3) connected""",
@@ -102,6 +104,9 @@ class LocationPlugin(b3.plugin.Plugin):
         # register the events needed
         self.registerEvent(b3.events.EVT_CLIENT_CONNECT)
 
+        # map event on specific functions
+        self._eventHandle[b3.events.EVT_CLIENT_CONNECT] = self.onConnect
+
         # notice plugin started
         self.debug('plugin started')
 
@@ -110,11 +115,11 @@ class LocationPlugin(b3.plugin.Plugin):
     # ######################################################################################### #    
 
     def onEvent(self, event):
-        """
+        """\
         Handle intercepted events
         """
-        if event.type == b3.events.EVT_CLIENT_CONNECT:
-            self.onConnect(event.client)
+        if event.type in self._eventHandle.keys():
+            self._eventHandle[event.type](event)
 
     # ######################################################################################### #
     # ####################################### FUNCTIONS ####################################### #        
@@ -198,10 +203,11 @@ class LocationPlugin(b3.plugin.Plugin):
 
         return round(abs(radius * b), 2)
 
-    def onConnect(self, client):
+    def onConnect(self, event):
         """
         Handle EVT_CLIENT_CONNECT
         """
+        client = event.client
         # if we already have location data
         # for this client, don't bother
         if client.isvar(self, 'location'):
