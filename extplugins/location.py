@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix'
-__version__ = '1.4'
+__version__ = '1.5'
 
 import b3
 import b3.plugin
@@ -34,8 +34,6 @@ class LocationPlugin(b3.plugin.Plugin):
 
     _announce = True
     _verbose = True
-
-    _eventHandle = dict()
 
     _messages = dict(
         connect="""^7%(client)s ^3from ^7%(country)s ^3connected""",
@@ -102,10 +100,7 @@ class LocationPlugin(b3.plugin.Plugin):
                     self._adminPlugin.registerCommand(self, cmd, level, func, alias)
         
         # register the events needed
-        self.registerEvent(b3.events.EVT_CLIENT_CONNECT)
-
-        # map event on specific functions
-        self._eventHandle[b3.events.EVT_CLIENT_CONNECT] = self.onConnect
+        self.registerEvent(b3.events.EVT_CLIENT_CONNECT, self.onConnect)
 
         # notice plugin started
         self.debug('plugin started')
@@ -114,12 +109,42 @@ class LocationPlugin(b3.plugin.Plugin):
     # ##################################### HANDLE EVENTS ##################################### #        
     # ######################################################################################### #    
 
-    def onEvent(self, event):
-        """\
-        Handle intercepted events
+    def onConnect(self, event):
         """
-        if event.type in self._eventHandle.keys():
-            self._eventHandle[event.type](event)
+        Handle EVT_CLIENT_CONNECT
+        """
+        client = event.client
+        # if we already have location data
+        # for this client, don't bother
+        if client.isvar(self, 'location'):
+            return
+
+        # retrieve geolocation data
+        loc = self.getLocationData(client)
+
+        if not loc:
+            # if we didn't manage to retrieve
+            # geolocation info just exit here
+            return
+
+        # store data in the client object so we do
+        # not have to query the API on every request
+        client.setvar(self, 'location', loc)
+
+        # if we have to announce and we got a valid response
+        # from the API, print location info in the game chat
+        if self._announce and self.console.upTime() > 300:
+
+            if self._verbose and 'city' in loc:
+                # if we got a proper city and we are supposed to display a verbose message
+                message = self._messages['connect_city'] % {'client': client.name,
+                                                            'city': loc['city'],
+                                                            'country': loc['country']}
+            else:
+                # just display basic geolocation info
+                message = self._messages['connect'] % {'client': client.name, 'country': loc['country']}
+
+            self.console.say(message)
 
     # ######################################################################################### #
     # ####################################### FUNCTIONS ####################################### #        
@@ -202,43 +227,6 @@ class LocationPlugin(b3.plugin.Plugin):
         b = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return round(abs(radius * b), 2)
-
-    def onConnect(self, event):
-        """
-        Handle EVT_CLIENT_CONNECT
-        """
-        client = event.client
-        # if we already have location data
-        # for this client, don't bother
-        if client.isvar(self, 'location'):
-            return
-
-        # retrieve geolocation data
-        loc = self.getLocationData(client)
-        
-        if not loc:
-            # if we didn't manage to retrieve
-            # geolocation info just exit here
-            return
-
-        # store data in the client object so we do
-        # not have to query the API on every request
-        client.setvar(self, 'location', loc)
-        
-        # if we have to announce and we got a valid response
-        # from the API, print location info in the game chat        
-        if self._announce and self.console.upTime() > 300:
-
-            if self._verbose and 'city' in loc:
-                # if we got a proper city and we are supposed to display a verbose message
-                message = self._messages['connect_city'] % {'client': client.name,
-                                                            'city': loc['city'],
-                                                            'country': loc['country']}
-            else:
-                # just display basic geolocation info
-                message = self._messages['connect'] % {'client': client.name, 'country': loc['country']}
-
-            self.console.say(message)
 
     # ######################################################################################### #
     # ######################################## COMMANDS ####################################### #        
