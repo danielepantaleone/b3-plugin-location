@@ -35,16 +35,34 @@ class LocationPlugin(b3.plugin.Plugin):
     _announce = True
     _verbose = True
 
-    _messages = dict(
-        connect="""^7%(client)s ^3from ^7%(country)s ^3connected""",
-        connect_city="""^7%(client)s ^3from ^7%(city)s ^3(^7%(country)s^3) connected""",
-        locate="""^7%(client)s ^3is connected from ^7%(country)s""",
-        locate_city="""^7%(client)s ^3is connected from ^7%(city)s ^3(^7%(country)s^3)""",
-        locate_failed="""^7Could not locate ^1%(client)s""",
-        distance="""^7%(client)s ^3is ^7%(distance).2f ^3km away from you""",
-        distance_self="""^7Sorry, I'm not that smart...meh!""",
-        distance_failed="""^7Could not compute distance with ^1%(client)s""",
-    )
+    ####################################################################################################################
+    ##                                                                                                                ##
+    ##   STARTUP                                                                                                      ##
+    ##                                                                                                                ##
+    ####################################################################################################################
+
+    def __init__(self, console, config=None):
+        """
+        Build the plugin object
+        """
+        b3.plugin.Plugin.__init__(self, console, config)
+
+        # get the admin plugin
+        self._adminPlugin = self.console.getPlugin('admin')
+        if not self._adminPlugin:
+            self.critical('could not start without admin plugin')
+            raise SystemExit(220)
+
+        self._default_messages = dict(
+            connect='''^7$client ^3from ^7$country ^3connected''',
+            connect_city='''^7$client ^3from ^7$city ^3(^7$country^3) connected''',
+            locate='''^7$client ^3is connected from ^7$country''',
+            locate_city='''^7$client ^3is connected from ^7$city ^3(^7$country^3)''',
+            locate_failed='''^7Could not locate ^1$client''',
+            distance='''^7$client ^3is ^7$distance ^3km away from you''',
+            distance_self='''^7Sorry, I'm not that smart...meh!''',
+            distance_failed='''^7Could not compute distance with ^1$client''',
+        )
 
     def onLoadConfig(self):
         """\
@@ -68,24 +86,10 @@ class LocationPlugin(b3.plugin.Plugin):
             self.error('could not load settings/verbose config value: %s' % e)
             self.debug('using default value (%s) for settings/verbose' % self._verbose)
 
-        ###
-        # loading in-game messages
-        ###
-
-        for m in self.config.options('messages'):
-            self._messages[m] = self.config.get('messages', m)
-            self.debug('loaded message (%s): %s' % (m, self._messages[m]))
-
     def onStartup(self):
         """
         Initialize plugin settings
         """
-        # get the admin plugin
-        self._adminPlugin = self.console.getPlugin('admin')
-        if not self._adminPlugin:    
-            self.error('Could not find admin plugin')
-            return False
-        
         # register our commands
         if 'commands' in self.config.sections():
             for cmd in self.config.options('commands'):
@@ -105,9 +109,11 @@ class LocationPlugin(b3.plugin.Plugin):
         # notice plugin started
         self.debug('plugin started')
 
-    # ######################################################################################### #
-    # ##################################### HANDLE EVENTS ##################################### #        
-    # ######################################################################################### #    
+    ####################################################################################################################
+    ##                                                                                                                ##
+    ##   EVENTS                                                                                                       ##
+    ##                                                                                                                ##
+    ####################################################################################################################
 
     def onConnect(self, event):
         """
@@ -137,18 +143,20 @@ class LocationPlugin(b3.plugin.Plugin):
 
             if self._verbose and 'city' in loc:
                 # if we got a proper city and we are supposed to display a verbose message
-                message = self._messages['connect_city'] % {'client': client.name,
-                                                            'city': loc['city'],
-                                                            'country': loc['country']}
+                message = self.getMessage('connect_city', {'client': client.name,
+                                                           'city': loc['city'],
+                                                           'country': loc['country']})
             else:
                 # just display basic geolocation info
-                message = self._messages['connect'] % {'client': client.name, 'country': loc['country']}
+                message = self.getMessage('connect', {'client': client.name, 'country': loc['country']})
 
             self.console.say(message)
 
-    # ######################################################################################### #
-    # ####################################### FUNCTIONS ####################################### #        
-    # ######################################################################################### # 
+    ####################################################################################################################
+    ##                                                                                                                ##
+    ##   FUNCTIONS                                                                                                    ##
+    ##                                                                                                                ##
+    ####################################################################################################################
 
     def getCmd(self, cmd):
         cmd = 'cmd_%s' % cmd
@@ -228,9 +236,11 @@ class LocationPlugin(b3.plugin.Plugin):
 
         return round(abs(radius * b), 2)
 
-    # ######################################################################################### #
-    # ######################################## COMMANDS ####################################### #        
-    # ######################################################################################### # 
+    ####################################################################################################################
+    ##                                                                                                                ##
+    ##   COMMANDS                                                                                                     ##
+    ##                                                                                                                ##
+    ####################################################################################################################
 
     def cmd_locate(self, data, client, cmd=None):
         """\
@@ -245,7 +255,7 @@ class LocationPlugin(b3.plugin.Plugin):
             return
 
         if not cl.isvar(self, 'location'):
-            cmd.sayLoudOrPM(client, self._messages['locate_failed'] % {'client': cl.name})
+            cmd.sayLoudOrPM(client, self.getMessage('locate_failed', {'client': cl.name}))
             return 
         
         # get the client location data
@@ -253,10 +263,10 @@ class LocationPlugin(b3.plugin.Plugin):
 
         if self._verbose and 'city' in loc:
             # if we got a proper city and we are supposed to display a verbose message
-            msg = self._messages['locate_city'] % {'client': cl.name, 'city': loc['city'], 'country': loc['country']}
+            msg = self.getMessage('locate_city', {'client': cl.name, 'city': loc['city'], 'country': loc['country']})
         else:
             # just display basic geolocation info
-            msg = self._messages['locate'] % {'client': cl.name, 'country': loc['country']}
+            msg = self.getMessage('locate', {'client': cl.name, 'country': loc['country']})
 
         cmd.sayLoudOrPM(client, msg)
 
@@ -273,14 +283,14 @@ class LocationPlugin(b3.plugin.Plugin):
             return
         
         if cl == client:
-            cmd.sayLoudOrPM(client, self._messages['distance_self'])
+            cmd.sayLoudOrPM(client, self.getMessage('distance_self'))
             return
         
         # compute the distance between the given clients
         # this will return false in case we have data inconsistency
         distance = self.getLocationDistance(client, cl)
         if not distance:
-            cmd.sayLoudOrPM(client, self._messages['distance_failed'] % {'client': cl.name})
+            cmd.sayLoudOrPM(client, self.getMessage('distance_failed', {'client': cl.name}))
             return
-        
-        cmd.sayLoudOrPM(client, self._messages['distance'] % {'client': cl.name, 'distance': distance})
+
+        cmd.sayLoudOrPM(client, self.getMessage('distance', {'client': cl.name, 'distance': distance}))
