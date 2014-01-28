@@ -5,14 +5,15 @@ Location Plugin for BigBrotherBot
 
 This plugin adds geolocation capability to the Big Brother Bot.<br />
 It retrieves geolocation data for every client using http://ip-api.com/ API system.<br /><br />
-*NOTE*: This plugin works differently from the CountryFilter Plugin (by courgette) since it doesn't have filtering capabilities but it provides only geolocation information.<br />
+*NOTE #1*: since version 1.5 this plugin works only with b3 1.10-dev or higher: http://files.cucurb.net/b3/daily/
+*NOTE #2*: This plugin works differently from the CountryFilter Plugin (by courgette) since it doesn't have filtering capabilities but it provides only geolocation information.<br />
 
 ## How to install
 
 ### Installing the plugin
 
 * Copy **location.py** into **b3/extplugins**
-* Copy **location.xml** into **b3/extplugins/conf**
+* Copy **plugin_location.ini** into **b3/extplugins/conf**
 * Load the plugin in your **b3.xml** configuration file
 
 ## In-game user guide

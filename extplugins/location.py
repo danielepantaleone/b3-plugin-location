@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix'
-__version__ = '1.5'
+__version__ = '1.6'
 
 import b3
 import b3.plugin
