@@ -22,9 +22,11 @@ __version__ = '1.5'
 import b3
 import b3.plugin
 import b3.events
-import urllib2
 import json
 import math
+
+from urllib2 import urlopen
+from urllib2 import URLError
 from ConfigParser import NoOptionError
 
 
@@ -169,13 +171,11 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         Retrieve location data from the API
         """
-        try:    
-            
+        try:
             # will retrieve necessary data from the API and perform some checks on it
             self.debug("contacting http://ip-api.com to retrieve location data for %s..." % client.name)
-            data = json.load(urllib2.urlopen('http://ip-api.com/json/%s' % client.ip))
-        
-        except urllib2.URLError, e:
+            data = json.load(urlopen('http://ip-api.com/json/%s' % client.ip))
+        except URLError, e:
             self.warning("could not connect to http://ip-api.com: %s" % e)
             return None
             
