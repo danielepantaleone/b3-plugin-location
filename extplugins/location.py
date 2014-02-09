@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix'
-__version__ = '1.6'
+__version__ = '1.7'
 
 import b3
 import b3.plugin
@@ -106,7 +106,7 @@ class LocationPlugin(b3.plugin.Plugin):
                     self._adminPlugin.registerCommand(self, cmd, level, func, alias)
         
         # register the events needed
-        self.registerEvent(b3.events.EVT_CLIENT_CONNECT, self.onConnect)
+        self.registerEvent(self.console.getEventID('EVT_CLIENT_CONNECT'), self.onConnect)
 
         # notice plugin started
         self.debug('plugin started')
