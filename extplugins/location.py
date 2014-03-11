@@ -111,6 +111,16 @@ class LocationPlugin(b3.plugin.Plugin):
         # notice plugin started
         self.debug('plugin started')
 
+    def onEnable(self):
+        """\
+        Executed when the plugin is enabled
+        """
+        for c in self.console.clients.getList():
+            if not c.isvar(self, 'location'):
+                loc = self.getLocationData(c)
+                if loc:
+                    c.setvar(self, 'location', loc)
+
     ####################################################################################################################
     ##                                                                                                                ##
     ##   EVENTS                                                                                                       ##
