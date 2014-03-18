@@ -104,9 +104,13 @@ class LocationPlugin(b3.plugin.Plugin):
                 func = self.getCmd(cmd)
                 if func: 
                     self._adminPlugin.registerCommand(self, cmd, level, func, alias)
-        
-        # register the events needed
-        self.registerEvent(self.console.getEventID('EVT_CLIENT_CONNECT'), self.onConnect)
+
+        try:
+            # register the events needed using the new event dispatch system
+            self.registerEvent(self.console.getEventID('EVT_CLIENT_CONNECT'), self.onConnect)
+        except TypeError:
+            # keep backwards compatibility
+            self.registerEvent(self.console.getEventID('EVT_CLIENT_CONNECT'))
 
         # notice plugin started
         self.debug('plugin started')
@@ -126,6 +130,13 @@ class LocationPlugin(b3.plugin.Plugin):
     ##   EVENTS                                                                                                       ##
     ##                                                                                                                ##
     ####################################################################################################################
+
+    def onEvent(self, event):
+        """\
+        Old event dispatch system
+        """
+        if event.type == self.console.getEventID('EVT_CLIENT_CONNECT'):
+            self.onConnect(event)
 
     def onConnect(self, event):
         """
