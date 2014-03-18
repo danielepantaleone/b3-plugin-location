@@ -3,11 +3,7 @@ Location Plugin for BigBrotherBot
 
 ## Description
 
-This plugin adds geolocation capability to the Big Brother Bot.<br />
-It retrieves geolocation data for every client using http://ip-api.com/ API system.
-
-* *NOTE #1*: since version 1.5 this plugin works only with b3 1.10-dev or higher: http://files.cucurb.net/b3/daily/
-* *NOTE #2*: this plugin works differently from the CountryFilter Plugin (by courgette) since it doesn't have filtering capabilities but it provides only geolocation information.
+This plugin adds geolocation capability to the Big Brother Bot by using http://ip-api.com/ API system.
 
 ## How to install
 
@@ -19,10 +15,10 @@ It retrieves geolocation data for every client using http://ip-api.com/ API syst
 
 ## In-game user guide
 
-* **!locate [client]** *Display geolocation info of the specified client*
-* **!distance [client]** *Display the world distance between you and the given client*
+* **!locate &lt;client&gt;** *display geolocation info of the specified client*
+* **!distance &lt;client&gt;** *display the world distance between you and the given client*
 
 ## Support
 
-For support regarding this very plugin you can find me on IRC on **#urbanterror / #goreclan** @ **Quakenet**<br>
+For support regarding this very plugin you can find me on IRC on **#goreclan** @ **Quakenet**<br>
 For support regarding Big Brother Bot you may ask for help on the official website: http://www.bigbrotherbot.net
