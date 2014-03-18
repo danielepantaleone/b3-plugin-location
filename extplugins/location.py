@@ -194,10 +194,10 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         try:
             # will retrieve necessary data from the API and perform some checks on it
-            self.debug("contacting http://ip-api.com to retrieve location data for %s..." % client.name)
+            self.debug("contacting ip-api.com to retrieve location data for %s..." % client.name)
             data = json.load(urlopen('http://ip-api.com/json/%s' % client.ip))
         except URLError, e:
-            self.warning("could not connect to http://ip-api.com: %s" % e)
+            self.warning("could not connect to ip-api.com: %s" % e)
             return None
             
         if data['status'] == 'fail':
@@ -265,10 +265,10 @@ class LocationPlugin(b3.plugin.Plugin):
 
     def cmd_locate(self, data, client, cmd=None):
         """\
-        <client> - Display geolocation info of the specified client
+        <client> - display geolocation info of the specified client
         """
         if not data: 
-            client.message('^7Invalid data, try ^3!^7help locate')
+            client.message('^7missing data, try ^3!^7help locate')
             return
         
         cl = self._adminPlugin.findClientPrompt(data, client)
@@ -293,10 +293,10 @@ class LocationPlugin(b3.plugin.Plugin):
 
     def cmd_distance(self, data, client, cmd=None):
         """\
-        <client> - Display the world distance between you and the given client
+        <client> - display the world distance between you and the given client
         """
         if not data: 
-            client.message('^7Invalid data, try ^3!^7help distance')
+            client.message('^7missing data, try ^3!^7help distance')
             return
         
         cl = self._adminPlugin.findClientPrompt(data, client)
