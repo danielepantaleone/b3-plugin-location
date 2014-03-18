@@ -34,8 +34,8 @@ class LocationPlugin(b3.plugin.Plugin):
     
     _adminPlugin = None
 
-    _announce = True
-    _verbose = True
+    _settings = dict(announce=True,
+                     verbose=True)
 
     ####################################################################################################################
     ##                                                                                                                ##
@@ -71,22 +71,24 @@ class LocationPlugin(b3.plugin.Plugin):
         Load plugin configuration
         """
         try:
-            self._announce = self.config.getboolean('settings', 'announce')
-            self.debug('loaded announce setting: %s' % self._verbose)
+            self._settings['announce'] = self.config.getboolean('settings', 'announce')
+            self.debug('loaded announce setting: %s' % self._settings['announce'])
         except NoOptionError:
-            self.warning('could not find settings/announce in config file, using default: %s' % self._announce)
+            self.warning('could not find settings/announce in config file, '
+                         'using default: %s' % self._settings['announce'])
         except ValueError, e:
             self.error('could not load settings/announce config value: %s' % e)
-            self.debug('using default value (%s) for settings/announce' % self._announce)
+            self.debug('using default value (%s) for settings/announce' % self._settings['announce'])
 
         try:
-            self._verbose = self.config.getboolean('settings', 'verbose')
-            self.debug('loaded verbose setting: %s' % self._verbose)
+            self._settings['verbose'] = self.config.getboolean('settings', 'verbose')
+            self.debug('loaded verbose setting: %s' % self._settings['verbose'])
         except NoOptionError:
-            self.warning('could not find settings/verbose in config file, using default: %s' % self._verbose)
+            self.warning('could not find settings/verbose in config file, '
+                         'using default: %s' % self._settings['verbose'])
         except ValueError, e:
             self.error('could not load settings/verbose config value: %s' % e)
-            self.debug('using default value (%s) for settings/verbose' % self._verbose)
+            self.debug('using default value (%s) for settings/verbose' % self._settings['verbose'])
 
     def onStartup(self):
         """
@@ -162,9 +164,9 @@ class LocationPlugin(b3.plugin.Plugin):
 
         # if we have to announce and we got a valid response
         # from the API, print location info in the game chat
-        if self._announce and self.console.upTime() > 300:
+        if self._settings['announce'] and self.console.upTime() > 300:
 
-            if self._verbose and 'city' in loc:
+            if self._settings['verbose'] and 'city' in loc:
                 # if we got a proper city and we are supposed to display a verbose message
                 message = self.getMessage('connect_city', {'client': client.name,
                                                            'city': loc['city'],
@@ -282,7 +284,7 @@ class LocationPlugin(b3.plugin.Plugin):
         # get the client location data
         loc = cl.var(self, 'location').value
 
-        if self._verbose and 'city' in loc:
+        if self._settings['verbose'] and 'city' in loc:
             # if we got a proper city and we are supposed to display a verbose message
             msg = self.getMessage('locate_city', {'client': cl.name, 'city': loc['city'], 'country': loc['country']})
         else:
