@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 __author__ = 'Fenix'
-__version__ = '1.9'
+__version__ = '1.10'
 
 import b3
 import b3.plugin
@@ -44,7 +44,7 @@ class LocationPlugin(b3.plugin.Plugin):
     ####################################################################################################################
 
     def __init__(self, console, config=None):
-        """
+        """\
         Build the plugin object
         """
         b3.plugin.Plugin.__init__(self, console, config)
@@ -64,6 +64,8 @@ class LocationPlugin(b3.plugin.Plugin):
             distance='''^7$client ^3is ^7$distance ^3km away from you''',
             distance_self='''^7Sorry, I'm not that smart...meh!''',
             distance_failed='''^7Could not compute distance with ^1$client''',
+            isp='''^7$client ^3is using ^7$isp ^3as isp''',
+            isp_failed='''^7Could not retrieve ^1$client ^7isp''',
         )
 
     def onLoadConfig(self):
@@ -91,7 +93,7 @@ class LocationPlugin(b3.plugin.Plugin):
             self.debug('using default value (%s) for settings/verbose' % self._settings['verbose'])
 
     def onStartup(self):
-        """
+        """\
         Initialize plugin settings
         """
         # register our commands
@@ -141,7 +143,7 @@ class LocationPlugin(b3.plugin.Plugin):
             self.onConnect(event)
 
     def onConnect(self, event):
-        """
+        """\
         Handle EVT_CLIENT_CONNECT
         """
         client = event.client
@@ -191,7 +193,7 @@ class LocationPlugin(b3.plugin.Plugin):
         return None    
 
     def getLocationData(self, client):
-        """
+        """\
         Retrieve location data from the API
         """
         try:
@@ -214,7 +216,7 @@ class LocationPlugin(b3.plugin.Plugin):
         return data
 
     def getLocationDistance(self, cl1, cl2):
-        """
+        """\
         Return the distance between 2 clients (in Km)
         """
         if not cl1.isvar(self, 'location'):
@@ -317,3 +319,23 @@ class LocationPlugin(b3.plugin.Plugin):
             return
 
         cmd.sayLoudOrPM(client, self.getMessage('distance', {'client': cl.name, 'distance': distance}))
+
+    def cmd_isp(self, data, client, cmd=None):
+        """\
+        <client> - display the isp the specified client is using
+        """
+        if not data:
+            client.message('^7missing data, try ^3!^7help isp')
+            return
+
+        cl = self._adminPlugin.findClientPrompt(data, client)
+        if not cl:
+            return
+
+        if not cl.isvar(self, 'location'):
+            cmd.sayLoudOrPM(client, self.getMessage('isp_failed', {'client': cl.name}))
+            return
+
+        # get the client location data
+        loc = cl.var(self, 'location').value
+        cmd.sayLoudOrPM(client, self.getMessage('isp', {'client': cl.name, 'isp': loc['isp']}))

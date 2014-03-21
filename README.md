@@ -17,6 +17,7 @@ This plugin adds geolocation capability to the Big Brother Bot by using http://i
 
 * **!locate &lt;client&gt;** *display geolocation info of the specified client*
 * **!distance &lt;client&gt;** *display the world distance between you and the given client*
+* **!isp &lt;client&gt;** *display the isp the specified client is using*
 
 ## Support
 
