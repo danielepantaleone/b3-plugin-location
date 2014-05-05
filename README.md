@@ -1,25 +1,40 @@
-Location Plugin for BigBrotherBot
+Location Plugin for BigBrotherBot [![BigBrotherBot](http://i.imgur.com/XaXZ9Ny.png)][B3]
 =================================
 
-## Description
+Description
+-----------
 
-This plugin adds geolocation capability to the Big Brother Bot by using http://ip-api.com/ API system.
+A [BigBrotherBot][B3] plugin which adds geolocation capabilities.
 
-## How to install
+Download
+--------
 
-### Installing the plugin
+Latest version avaiable [here](https://github.com/FenixXx/b3-plugin-location/archive/master.zip).
 
-* Copy **location.py** into **b3/extplugins**
-* Copy **plugin_location.ini** into **b3/extplugins/conf**
-* Load the plugin in your **b3.xml** configuration file
+Installation
+------------
 
-## In-game user guide
+* copy the `location.py` file into `b3/extplugins`
+* copy the `plugin_location.ini` file in `b3/extplugins/conf`
+* add to the `plugins` section of your `b3.xml` config file:
 
-* **!locate &lt;client&gt;** *display geolocation info of the specified client*
-* **!distance &lt;client&gt;** *display the world distance between you and the given client*
-* **!isp &lt;client&gt;** *display the isp the specified client is using*
+  ```xml
+  <plugin name="location" config="@b3/extplugins/conf/plugin_location.ini" />
+  ```
 
-## Support
+In-game user guide
+------------------
 
-For support regarding this very plugin you can find me on IRC on **#goreclan** @ **Quakenet**<br>
-For support regarding Big Brother Bot you may ask for help on the official website: http://www.bigbrotherbot.net
+* **!locate &lt;client&gt;** `display geolocation info of the specified client`
+* **!distance &lt;client&gt;** `display the world distance between you and the given client`
+* **!isp &lt;client&gt;** `display the isp the specified client is using`
+
+Support
+-------
+
+If you have found a bug or have a suggestion for this plugin, please report it on the [B3 forums][Support].
+
+[B3]: http://www.bigbrotherbot.net/ "BigBrotherBot (B3)"
+[Support]: http://forum.bigbrotherbot.net/releases/location-plugin/ "Support topic on the B3 forums"
+
+[![Build Status](https://travis-ci.org/FenixXx/b3-plugin-location.svg?branch=master)](https://travis-ci.org/FenixXx/b3-plugin-location)
