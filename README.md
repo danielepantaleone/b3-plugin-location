@@ -1,4 +1,4 @@
-Location Plugin for BigBrotherBot [![BigBrotherBot](http://i.imgur.com/XaXZ9Ny.png)][B3]
+Location Plugin for BigBrotherBot [![BigBrotherBot](http://i.imgur.com/7sljo4G.png)][B3]
 =================================
 
 Description
