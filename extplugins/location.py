@@ -197,13 +197,6 @@ class LocationPlugin(b3.plugin.Plugin):
     ##                                                                                                                ##
     ####################################################################################################################
 
-    def getCmd(self, cmd):
-        cmd = 'cmd_%s' % cmd
-        if hasattr(self, cmd):
-            func = getattr(self, cmd)
-            return func
-        return None    
-
     def getLocationData(self, client):
         """
         Retrieve location data from the API
