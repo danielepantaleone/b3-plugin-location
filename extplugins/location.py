@@ -46,8 +46,10 @@ class LocationPlugin(b3.plugin.Plugin):
     
     _adminPlugin = None
 
-    _settings = dict(announce=True,
-                     verbose=True)
+    _settings = {
+        'announce': True,
+        'verbose': True
+    }
 
     ####################################################################################################################
     ##                                                                                                                ##
@@ -67,18 +69,18 @@ class LocationPlugin(b3.plugin.Plugin):
             self.critical('could not start without admin plugin')
             raise SystemExit(220)
 
-        self._default_messages = dict(
-            connect='''^7$client ^3from ^7$country ^3connected''',
-            connect_city='''^7$client ^3from ^7$city ^3(^7$country^3) connected''',
-            locate='''^7$client ^3is connected from ^7$country''',
-            locate_city='''^7$client ^3is connected from ^7$city ^3(^7$country^3)''',
-            locate_failed='''^7Could not locate ^1$client''',
-            distance='''^7$client ^3is ^7$distance ^3km away from you''',
-            distance_self='''^7Sorry, I'm not that smart...meh!''',
-            distance_failed='''^7Could not compute distance with ^1$client''',
-            isp='''^7$client ^3is using ^7$isp ^3as isp''',
-            isp_failed='''^7Could not retrieve ^1$client ^7isp''',
-        )
+        self._default_messages = {
+            'connect': "^7$client ^3from ^7$country ^3connected",
+            'connect_city': "^7$client ^3from ^7$city ^3(^7$country^3) connected",
+            'locate': "^7$client ^3is connected from ^7$country",
+            'locate_city': "^7$client ^3is connected from ^7$city ^3(^7$country^3)",
+            'locate_failed': "^7Could not locate ^1$client",
+            'distance': "^7$client ^3is ^7$distance ^3km away from you",
+            'distance_self': "^7Sorry, I'm not that smart...meh!",
+            'distance_failed': "^7Could not compute distance with ^1$client",
+            'isp': "^7$client ^3is using ^7$isp ^3as isp",
+            'isp_failed': "^7Could not retrieve ^1$client ^7isp",
+        }
 
     def onLoadConfig(self):
         """
