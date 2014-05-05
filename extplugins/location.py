@@ -9,15 +9,15 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 __author__ = 'Fenix'
-__version__ = '1.10'
+__version__ = '1.11'
 
 import b3
 import b3.plugin
@@ -28,6 +28,18 @@ import math
 from urllib2 import urlopen
 from urllib2 import URLError
 from ConfigParser import NoOptionError
+
+try:
+    # import the getCmd function
+    import b3.functions.getCmd as getCmd
+except ImportError:
+    # keep backward compatibility
+    def getCmd(instance, cmd):
+        cmd = 'cmd_%s' % cmd
+        if hasattr(instance, cmd):
+            func = getattr(instance, cmd)
+            return func
+        return None
 
 
 class LocationPlugin(b3.plugin.Plugin):
@@ -44,7 +56,7 @@ class LocationPlugin(b3.plugin.Plugin):
     ####################################################################################################################
 
     def __init__(self, console, config=None):
-        """\
+        """
         Build the plugin object
         """
         b3.plugin.Plugin.__init__(self, console, config)
@@ -69,7 +81,7 @@ class LocationPlugin(b3.plugin.Plugin):
         )
 
     def onLoadConfig(self):
-        """\
+        """
         Load plugin configuration
         """
         try:
@@ -93,7 +105,7 @@ class LocationPlugin(b3.plugin.Plugin):
             self.debug('using default value (%s) for settings/verbose' % self._settings['verbose'])
 
     def onStartup(self):
-        """\
+        """
         Initialize plugin settings
         """
         # register our commands
@@ -105,7 +117,7 @@ class LocationPlugin(b3.plugin.Plugin):
                 if len(sp) == 2: 
                     cmd, alias = sp
 
-                func = self.getCmd(cmd)
+                func = getCmd(self, cmd)
                 if func: 
                     self._adminPlugin.registerCommand(self, cmd, level, func, alias)
 
@@ -120,7 +132,7 @@ class LocationPlugin(b3.plugin.Plugin):
         self.debug('plugin started')
 
     def onEnable(self):
-        """\
+        """
         Executed when the plugin is enabled
         """
         for c in self.console.clients.getList():
@@ -136,14 +148,14 @@ class LocationPlugin(b3.plugin.Plugin):
     ####################################################################################################################
 
     def onEvent(self, event):
-        """\
+        """
         Old event dispatch system
         """
         if event.type == self.console.getEventID('EVT_CLIENT_CONNECT'):
             self.onConnect(event)
 
     def onConnect(self, event):
-        """\
+        """
         Handle EVT_CLIENT_CONNECT
         """
         client = event.client
@@ -193,7 +205,7 @@ class LocationPlugin(b3.plugin.Plugin):
         return None    
 
     def getLocationData(self, client):
-        """\
+        """
         Retrieve location data from the API
         """
         try:
@@ -216,7 +228,7 @@ class LocationPlugin(b3.plugin.Plugin):
         return data
 
     def getLocationDistance(self, cl1, cl2):
-        """\
+        """
         Return the distance between 2 clients (in Km)
         """
         if not cl1.isvar(self, 'location'):
@@ -268,7 +280,7 @@ class LocationPlugin(b3.plugin.Plugin):
     ####################################################################################################################
 
     def cmd_locate(self, data, client, cmd=None):
-        """\
+        """
         <client> - display geolocation info of the specified client
         """
         if not data: 
@@ -296,7 +308,7 @@ class LocationPlugin(b3.plugin.Plugin):
         cmd.sayLoudOrPM(client, msg)
 
     def cmd_distance(self, data, client, cmd=None):
-        """\
+        """
         <client> - display the world distance between you and the given client
         """
         if not data: 
@@ -321,7 +333,7 @@ class LocationPlugin(b3.plugin.Plugin):
         cmd.sayLoudOrPM(client, self.getMessage('distance', {'client': cl.name, 'distance': distance}))
 
     def cmd_isp(self, data, client, cmd=None):
-        """\
+        """
         <client> - display the isp the specified client is using
         """
         if not data:
