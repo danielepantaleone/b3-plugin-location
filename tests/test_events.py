@@ -23,7 +23,7 @@ from tests import logging_disabled
 from location import LocationPlugin
 
 
-class Test_commands(LocationTestCase):
+class Test_events(LocationTestCase):
 
     def setUp(self):
         LocationTestCase.setUp(self)
