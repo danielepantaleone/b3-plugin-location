@@ -35,6 +35,6 @@ Support
 If you have found a bug or have a suggestion for this plugin, please report it on the [B3 forums][Support].
 
 [B3]: http://www.bigbrotherbot.net/ "BigBrotherBot (B3)"
-[Support]: http://forum.bigbrotherbot.net/releases/location-plugin/ "Support topic on the B3 forums"
+[Support]: http://forum.bigbrotherbot.net/plugins-by-fenix/location-plugin "Support topic on the B3 forums"
 
 [![Build Status](https://travis-ci.org/FenixXx/b3-plugin-location.svg?branch=master)](https://travis-ci.org/FenixXx/b3-plugin-location)
