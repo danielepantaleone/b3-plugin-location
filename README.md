@@ -9,7 +9,7 @@ A [BigBrotherBot][B3] plugin which adds geolocation capabilities.
 Download
 --------
 
-Latest version avaiable [here](https://github.com/FenixXx/b3-plugin-location/archive/master.zip).
+Latest version available [here](https://github.com/FenixXx/b3-plugin-location/archive/master.zip).
 
 Installation
 ------------
