@@ -33,35 +33,9 @@ from b3 import __version__ as b3_version
 from location import LocationPlugin
 
 
-def patch_location_plugin():
-
-    # patch the getLocationData method so it returns
-    # static json data instead of querying the API
-    def getLocationData(this, client):
-        return json.loads("""{"status":"success","country":"Italy","countryCode":"IT","region":"07",
+FAKE_LOCATION_DATA = json.loads("""{"status":"success","country":"Italy","countryCode":"IT","region":"07",
         "regionName":"Lazio", "city":"Rome","zip":"00100","lat":"41.9","lon":"12.4833","timezone":"Europe\/Rome",
         "isp":"Fastweb","org":"Fastweb", "as":"AS12874 Fastweb SpA","query":"93.40.107.236"}""")
-
-    # patch the getLocationDistance method so it returns
-    # a fixed distance between random coordinates
-    def getLocationDistance(this, cl1, cl2):
-
-        lat1 = 41.9
-        lon1 = 12.4833
-        lat2 = 38.0
-        lon2 = -97.0
-
-        radius = 6371  # Earth radius in Km
-        dlat = math.radians(lat2 - lat1)
-        dlon = math.radians(lon2 - lon1)
-
-        a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(math.radians(lat1)) \
-            * math.cos(math.radians(lat2)) * math.sin(dlon / 2) * math.sin(dlon / 2)
-        b = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-        return round(abs(radius * b), 2)
-
-    LocationPlugin.getLocationData = getLocationData
-    LocationPlugin.getLocationDistance = getLocationDistance
 
 
 class logging_disabled(object):
@@ -114,9 +88,6 @@ class LocationTestCase(unittest2.TestCase):
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
-
-        # patch the location plugin for the automated tests
-        patch_location_plugin()
 
         self.console.screen = Mock()
         self.console.time = time.time

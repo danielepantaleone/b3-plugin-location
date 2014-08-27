@@ -16,9 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+from mockito import when, any as ANY, unstub
 from b3.config import CfgConfigParser
 from textwrap import dedent
-from tests import LocationTestCase
+from tests import LocationTestCase, FAKE_LOCATION_DATA
 from tests import logging_disabled
 from location import LocationPlugin
 
@@ -56,6 +57,8 @@ class Test_commands(LocationTestCase):
         self.p.onLoadConfig()
         self.p.onStartup()
 
+        when(self.p).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
+
         with logging_disabled():
             from b3.fake import FakeClient
 
@@ -66,6 +69,10 @@ class Test_commands(LocationTestCase):
         # connect the clients
         self.mike.connects("1")
         self.bill.connects("2")
+
+    def tearDown(self):
+        LocationTestCase.tearDown(self)
+        unstub()
 
     ####################################################################################################################
     ##                                                                                                                ##
@@ -120,6 +127,8 @@ class Test_commands(LocationTestCase):
         self.assertListEqual(['Sorry, I\'m not that smart...meh!'], self.mike.message_history)
 
     def test_cmd_distance(self):
+        # GIVEN
+        when(self.p).getLocationDistance(ANY(), ANY()).thenReturn(8623.52)
         # WHEN
         self.mike.clearMessageHistory()
         self.mike.says("!distance bill")
