@@ -15,10 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+import socket
+from urllib2 import URLError
 
+from mockito import when, any as ANY
 from b3.config import CfgConfigParser
 from textwrap import dedent
-from tests import LocationTestCase
+from tests import LocationTestCase, FAKE_LOCATION_DATA
 from tests import logging_disabled
 from location import LocationPlugin
 
@@ -68,7 +71,18 @@ class Test_events(LocationTestCase):
     ####################################################################################################################
 
     def test_event_client_connect(self):
+        # GIVEN
+        when(self.p).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
         # WHEN
         self.mike.connects("1")
         # THEN
         self.assertEqual(True, self.mike.isvar(self.p, 'location'))
+
+
+    def test_event_client_connect_API_timeout(self):
+        # GIVEN
+        when(self.p).getLocationData(ANY()).thenRaise(URLError(reason=socket.timeout))
+        # WHEN
+        self.mike.connects("1")
+        # THEN
+        self.assertEqual(False, self.mike.isvar(self.p, 'location'))

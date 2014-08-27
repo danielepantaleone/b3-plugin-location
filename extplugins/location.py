@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 __author__ = 'Fenix'
-__version__ = '1.11'
+__version__ = '1.12'
 
 import b3
 import b3.plugin
@@ -43,6 +43,8 @@ except ImportError:
 
 
 class LocationPlugin(b3.plugin.Plugin):
+
+    LOCATION_API_TIMEOUT = 5
     
     _adminPlugin = None
 
@@ -206,7 +208,8 @@ class LocationPlugin(b3.plugin.Plugin):
         try:
             # will retrieve necessary data from the API and perform some checks on it
             self.debug("contacting ip-api.com to retrieve location data for %s..." % client.name)
-            data = json.load(urlopen('http://ip-api.com/json/%s' % client.ip))
+            data = json.load(urlopen('http://ip-api.com/json/%s' % client.ip,
+                                     timeout=LocationPlugin.LOCATION_API_TIMEOUT))
         except URLError, e:
             self.warning("could not connect to ip-api.com: %s" % e)
             return None
