@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-import math
 import json
 import time
 import logging
@@ -65,9 +64,6 @@ class logging_disabled(object):
 class LocationTestCase(unittest2.TestCase):
 
     def setUp(self):
-        self.sleep_patcher = patch("time.sleep")
-        self.sleep_mock = self.sleep_patcher.start()
-
         # create a FakeConsole parser
         self.parser_conf = XmlConfigParser()
         self.parser_conf.loadFromString(r"""<configuration/>""")
@@ -93,6 +89,3 @@ class LocationTestCase(unittest2.TestCase):
         self.console.time = time.time
         self.console.upTime = Mock(return_value=3)
         self.console.cron.stop()
-
-    def tearDown(self):
-        self.sleep_patcher.stop()

@@ -15,4 +15,4 @@ install:
   - pip install -e ${B3_REPO} --use-mirrors
 
 # command to run tests, e.g. python setup.py test
-script: PYTHONPATH=extplugins nosetests --where=tests
+script: PYTHONPATH=extplugins nosetests --where=tests -a '!slow'

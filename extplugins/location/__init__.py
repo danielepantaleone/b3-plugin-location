@@ -17,16 +17,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 __author__ = 'Fenix'
-__version__ = '1.12'
+__version__ = '1.13'
 
+from threading import Thread
+from . import requests
 import b3
 import b3.plugin
 import b3.events
-import json
 import math
 
-from urllib2 import urlopen
-from urllib2 import URLError
 from ConfigParser import NoOptionError
 
 try:
@@ -168,6 +167,12 @@ class LocationPlugin(b3.plugin.Plugin):
         if client.isvar(self, 'location'):
             return
 
+        # handling the event in a thread so B3 can pass that event to other plugins right away
+        t = Thread(target=self._threaded_on_connect, args=(client, ))
+        t.daemon = True  # won't prevent B3 from exiting
+        t.start()
+
+    def _threaded_on_connect(self, client):
         # retrieve geolocation data
         loc = self.getLocationData(client)
 
@@ -208,9 +213,9 @@ class LocationPlugin(b3.plugin.Plugin):
         try:
             # will retrieve necessary data from the API and perform some checks on it
             self.debug("contacting ip-api.com to retrieve location data for %s..." % client.name)
-            data = json.load(urlopen('http://ip-api.com/json/%s' % client.ip,
-                                     timeout=LocationPlugin.LOCATION_API_TIMEOUT))
-        except URLError, e:
+            data = requests.get('http://ip-api.com/json/%s' % client.ip,
+                                timeout=LocationPlugin.LOCATION_API_TIMEOUT).json()
+        except requests.exceptions.RequestException, e:
             self.warning("could not connect to ip-api.com: %s" % e)
             return None
             

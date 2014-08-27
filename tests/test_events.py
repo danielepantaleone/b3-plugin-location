@@ -15,15 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-import socket
-from urllib2 import URLError
 
+
+from nose.plugins.attrib import attr
 from mockito import when, any as ANY
+import time
+import sys
+
 from b3.config import CfgConfigParser
 from textwrap import dedent
 from tests import LocationTestCase, FAKE_LOCATION_DATA
 from tests import logging_disabled
-from location import LocationPlugin
+from location import LocationPlugin, requests
 
 
 class Test_events(LocationTestCase):
@@ -70,19 +73,31 @@ class Test_events(LocationTestCase):
     ##                                                                                                                ##
     ####################################################################################################################
 
+    @attr('slow')
+    def test_event_client_connect_not_patched(self):
+        # GIVEN
+        self.mike.ip = "8.8.8.8"
+        # WHEN
+        self.mike.connects("1")
+        time.sleep(LocationPlugin.LOCATION_API_TIMEOUT + .4)  # give a chance to the thread to do its job
+        # THEN
+        self.assertEqual(True, self.mike.isvar(self.p, 'location'))
+        print >> sys.stderr, "IP: %s, LOC: %r" % (self.mike.ip, self.mike.var(self.p, 'location').value)
+
     def test_event_client_connect(self):
         # GIVEN
         when(self.p).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
         # WHEN
         self.mike.connects("1")
+        time.sleep(.5)  # give a chance to the thread to do its job
         # THEN
         self.assertEqual(True, self.mike.isvar(self.p, 'location'))
 
-
     def test_event_client_connect_API_timeout(self):
         # GIVEN
-        when(self.p).getLocationData(ANY()).thenRaise(URLError(reason=socket.timeout))
+        when(self.p).getLocationData(ANY()).thenRaise(requests.exceptions.Timeout())
         # WHEN
         self.mike.connects("1")
+        time.sleep(.5)  # give a chance to the thread to do its job
         # THEN
         self.assertEqual(False, self.mike.isvar(self.p, 'location'))
