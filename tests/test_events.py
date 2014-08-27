@@ -77,3 +77,12 @@ class Test_events(LocationTestCase):
         self.mike.connects("1")
         # THEN
         self.assertEqual(True, self.mike.isvar(self.p, 'location'))
+
+
+    def test_event_client_connect_API_timeout(self):
+        # GIVEN
+        when(self.p).getLocationData(ANY()).thenRaise(URLError(reason=socket.timeout))
+        # WHEN
+        self.mike.connects("1")
+        # THEN
+        self.assertEqual(False, self.mike.isvar(self.p, 'location'))
