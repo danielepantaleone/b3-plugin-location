@@ -14,7 +14,7 @@ Latest version available [here](https://github.com/FenixXx/b3-plugin-location/ar
 Installation
 ------------
 
-* copy the `location.py` file into `b3/extplugins`
+* copy the `extplugins/location` directory into `b3/extplugins`
 * copy the `plugin_location.ini` file in `b3/extplugins/conf`
 * add to the `plugins` section of your `b3.xml` config file:
 
