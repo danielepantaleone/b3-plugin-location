@@ -14,7 +14,7 @@ Latest version available [here](https://github.com/FenixXx/b3-plugin-location/ar
 Installation
 ------------
 
-* copy the `location.py` file into `b3/extplugins`
+* copy the `extplugins/location` directory into `b3/extplugins`
 * copy the `plugin_location.ini` file in `b3/extplugins/conf`
 * add to the `plugins` section of your `b3.xml` config file:
 
@@ -37,6 +37,9 @@ If you have found a bug or have a suggestion for this plugin, please report it o
 
 Changelog
 ---------
+
+### 1.13 - 2014/08/27
+- handle EVT_CLIENT_CONNECT events in a thread to help unclogging the B3 event queue
 
 ### 1.12 - 2014/08/27
 - set up a 5 seconds timeout when querying ip-api.com
