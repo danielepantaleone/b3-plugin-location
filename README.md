@@ -29,21 +29,22 @@ In-game user guide
 * **!distance &lt;client&gt;** `display the world distance between you and the given client`
 * **!isp &lt;client&gt;** `display the isp the specified client is using`
 
+
+Changelog
+---------
+### 1.14 - 2014/09/12 - Fenix
+- make sure to remove/replace unprintable characters from location information
+
+### 1.13 - 2014/08/27 - Courgette
+- handle EVT_CLIENT_CONNECT events in a thread to help unclogging the B3 event queue
+
+### 1.12 - 2014/08/27 - Courgette
+- set up a 5 seconds timeout when querying ip-api.com
+
 Support
 -------
 
 If you have found a bug or have a suggestion for this plugin, please report it on the [B3 forums][Support].
-
-
-Changelog
----------
-
-### 1.13 - 2014/08/27
-- handle EVT_CLIENT_CONNECT events in a thread to help unclogging the B3 event queue
-
-### 1.12 - 2014/08/27
-- set up a 5 seconds timeout when querying ip-api.com
-
 
 
 [B3]: http://www.bigbrotherbot.net/ "BigBrotherBot (B3)"
