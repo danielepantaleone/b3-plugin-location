@@ -26,7 +26,9 @@ from b3.config import CfgConfigParser
 from textwrap import dedent
 from tests import LocationTestCase, FAKE_LOCATION_DATA
 from tests import logging_disabled
-from location import LocationPlugin, requests
+from location import LocationPlugin
+from location import requests
+from location.requests.exceptions import Timeout
 
 
 class Test_events(LocationTestCase):
@@ -95,7 +97,7 @@ class Test_events(LocationTestCase):
 
     def test_event_client_connect_API_timeout(self):
         # GIVEN
-        when(self.p).getLocationData(ANY()).thenRaise(requests.exceptions.Timeout())
+        when(self.p).getLocationData(ANY()).thenRaise(Timeout())
         # WHEN
         self.mike.connects("1")
         time.sleep(.5)  # give a chance to the thread to do its job

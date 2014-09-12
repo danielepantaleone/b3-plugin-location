@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Location Plugin for BigBrotherBot(B3) (www.bigbrotherbot.net)
 # Copyright (C) 2013 Daniele Pantaleone <fenix@bigbrotherbot.net>
@@ -22,19 +23,17 @@ import logging
 import unittest2
 
 from mock import Mock
-from mock import patch
 from mockito import when
 from b3.config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from b3.update import B3version
 from b3 import __version__ as b3_version
 
-from location import LocationPlugin
-
 
 FAKE_LOCATION_DATA = json.loads("""{"status":"success","country":"Italy","countryCode":"IT","region":"07",
-        "regionName":"Lazio", "city":"Rome","zip":"00100","lat":"41.9","lon":"12.4833","timezone":"Europe\/Rome",
-        "isp":"Fastweb","org":"Fastweb", "as":"AS12874 Fastweb SpA","query":"93.40.107.236"}""")
+                                "regionName":"Lazio", "city":"Rome","zip":"00100","lat":"41.9","lon":"12.4833",
+                                "timezone":"Europe\/Rome", "isp":"Fastweb","org":"Fastweb", "as":"AS12874 Fastweb SpA",
+                                "query":"93.40.107.236"}""")
 
 
 class logging_disabled(object):

@@ -17,12 +17,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 __author__ = 'Fenix'
-__version__ = '1.13'
+__version__ = '1.14'
 
 import b3
 import b3.plugin
 import b3.events
 import math
+import unicodedata
 
 from ConfigParser import NoOptionError
 from threading import Thread
@@ -226,6 +227,10 @@ class LocationPlugin(b3.plugin.Plugin):
         if 'country' not in data:
             self.debug('could not establish in which country is ip %s' % client.ip)
             return None
+
+        for index in data:
+            # additional check which replace/remove non-printable characters from retrieved data
+            data[index] = unicodedata.normalize('NFKD', data[index]).encode('ascii','ignore').strip()
 
         self.debug("retrieved location data for %s: %r" % (client.name, data))
         return data
