@@ -19,14 +19,15 @@
 __author__ = 'Fenix'
 __version__ = '1.13'
 
-from threading import Thread
-from . import requests
 import b3
 import b3.plugin
 import b3.events
 import math
 
 from ConfigParser import NoOptionError
+from threading import Thread
+from .requests.exceptions import RequestException
+from . import requests
 
 try:
     # import the getCmd function
@@ -188,7 +189,6 @@ class LocationPlugin(b3.plugin.Plugin):
         # if we have to announce and we got a valid response
         # from the API, print location info in the game chat
         if self._settings['announce'] and self.console.upTime() > 300:
-
             if self._settings['verbose'] and 'city' in loc:
                 # if we got a proper city and we are supposed to display a verbose message
                 message = self.getMessage('connect_city', {'client': client.name,
@@ -215,7 +215,7 @@ class LocationPlugin(b3.plugin.Plugin):
             self.debug("contacting ip-api.com to retrieve location data for %s..." % client.name)
             data = requests.get('http://ip-api.com/json/%s' % client.ip,
                                 timeout=LocationPlugin.LOCATION_API_TIMEOUT).json()
-        except requests.exceptions.RequestException, e:
+        except RequestException, e:
             self.warning("could not connect to ip-api.com: %s" % e)
             return None
             
