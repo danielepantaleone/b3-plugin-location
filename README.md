@@ -9,7 +9,7 @@ A [BigBrotherBot][B3] plugin which adds geolocation capabilities.
 Download
 --------
 
-Latest version available [here](https://github.com/FenixXx/b3-plugin-location/archive/master.zip).
+Latest version available [here](https://github.com/danielepantaleone/b3-plugin-location/archive/master.zip).
 
 Installation
 ------------
@@ -50,4 +50,4 @@ If you have found a bug or have a suggestion for this plugin, please report it o
 [B3]: http://www.bigbrotherbot.net/ "BigBrotherBot (B3)"
 [Support]: http://forum.bigbrotherbot.net/plugins-by-fenix/location-plugin "Support topic on the B3 forums"
 
-[![Build Status](https://travis-ci.org/FenixXx/b3-plugin-location.svg?branch=master)](https://travis-ci.org/FenixXx/b3-plugin-location)
+[![Build Status](https://travis-ci.org/danielepantaleone/b3-plugin-location.svg?branch=master)](https://travis-ci.org/danielepantaleone/b3-plugin-location)
