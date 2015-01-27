@@ -17,13 +17,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 __author__ = 'Fenix'
-__version__ = '1.14'
+__version__ = '1.15'
 
 import b3
 import b3.plugin
 import b3.events
 import math
-import unicodedata
+import unicodedata as ud
 
 from ConfigParser import NoOptionError
 from threading import Thread
@@ -43,11 +43,84 @@ except ImportError:
         return None
 
 
-class LocationPlugin(b3.plugin.Plugin):
+class Locator(object):
 
-    LOCATION_API_TIMEOUT = 5
+    _timeout = 5
+
+    @classmethod
+    def getLocationData(cls, client):
+        """
+        Retrieve location data
+        :param client: The client geolocalize
+        :raise RequestException: When we are not able to retrieve location information
+        :return: A dict with location information
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def normalize(cls, data):
+        """
+        Normalize returned data
+        :param data: A dict with location data
+        :return: A dict with location data normalized (printable in game chat/console)
+        """
+        # do not use dict comprehension syntax for python 2.6 compatibility
+        return dict((k, ud.normalize('NFKD', unicode(v)).encode('ascii','ignore').strip()) for (k, v) in data.items())
+
+
+class IpApiLocator(Locator):
+
+    _url = 'http://ip-api.com/json/%s'
+
+    @classmethod
+    def getLocationData(cls, client):
+        """
+        Retrieve location data
+        :param client: The client geolocalize
+        :raise RequestException: When we are not able to retrieve location information
+        :raise AttributeError: When returned data doesn't contain necessary information
+        :return: A dict with location information
+        """
+        data = requests.get(cls._url % client.ip, timeout=cls._timeout).json()
+
+        if data['status'] == 'fail':
+            raise RequestException('invalid data returned by the api: %r' % data)
+
+        if 'country' not in data:
+            raise AttributeError('could not establish in which country is ip %s' % client.ip)
+
+        return cls.normalize(data)
+
+
+class TelizeLocator(Locator):
+
+    _url = 'http://www.telize.com/geoip/%s'
+
+    @classmethod
+    def getLocationData(cls, client):
+        """
+        Retrieve location data
+        :param client: The client geolocalize
+        :raise RequestException: When we are not able to retrieve location information
+        :raise AttributeError: When returned data doesn't contain necessary information
+        :return: A dict with location information
+        """
+        data = requests.get(cls._url % client.ip, timeout=cls._timeout).json()
+
+        if 'code' in data and int(data['code']) == 401:
+            raise RequestException('input string is not a valid ip address: %s' % client.ip)
+
+        if 'country' not in data:
+            raise AttributeError('could not establish in which country is ip %s' % client.ip)
+
+        return cls.normalize(data)
+
+
+class LocationPlugin(b3.plugin.Plugin):
     
     _adminPlugin = None
+
+    _locators = frozenset([IpApiLocator, TelizeLocator])
 
     _settings = {
         'announce': True,
@@ -62,7 +135,7 @@ class LocationPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         """
-        Build the plugin object
+        Build the plugin object.
         """
         b3.plugin.Plugin.__init__(self, console, config)
 
@@ -93,8 +166,7 @@ class LocationPlugin(b3.plugin.Plugin):
             self._settings['announce'] = self.config.getboolean('settings', 'announce')
             self.debug('loaded announce setting: %s' % self._settings['announce'])
         except NoOptionError:
-            self.warning('could not find settings/announce in config file, '
-                         'using default: %s' % self._settings['announce'])
+            self.warning('could not find settings/announce in config file, using default: %s' % self._settings['announce'])
         except ValueError, e:
             self.error('could not load settings/announce config value: %s' % e)
             self.debug('using default value (%s) for settings/announce' % self._settings['announce'])
@@ -103,8 +175,7 @@ class LocationPlugin(b3.plugin.Plugin):
             self._settings['verbose'] = self.config.getboolean('settings', 'verbose')
             self.debug('loaded verbose setting: %s' % self._settings['verbose'])
         except NoOptionError:
-            self.warning('could not find settings/verbose in config file, '
-                         'using default: %s' % self._settings['verbose'])
+            self.warning('could not find settings/verbose in config file, using default: %s' % self._settings['verbose'])
         except ValueError, e:
             self.error('could not load settings/verbose config value: %s' % e)
             self.debug('using default value (%s) for settings/verbose' % self._settings['verbose'])
@@ -138,13 +209,26 @@ class LocationPlugin(b3.plugin.Plugin):
 
     def onEnable(self):
         """
-        Executed when the plugin is enabled
+        Executed when the plugin is enabled.
         """
-        for c in self.console.clients.getList():
-            if not c.isvar(self, 'location'):
-                loc = self.getLocationData(c)
-                if loc:
-                    c.setvar(self, 'location', loc)
+        def _threaded_get_location_data(client):
+
+            for c in self._locators:
+
+                try:
+                    self.debug('retrieving location data for %s: %s' % (client.name, c._url % client.ip))
+                    data = c.getLocationData(client)
+                    self.debug("retrieved location data for %s: %r" % (client.name, data))
+                    client.setvar(self, 'location', data)
+                    return
+                except Exception, e:
+                    self.warning('could not retrieve location data for %s using %s: %s' % (client.name, c._url % client.ip, e))
+
+        for cl in self.console.clients.getList():
+            if not cl.isvar(self, 'location'):
+                t = Thread(target=_threaded_get_location_data, args=(cl, ))
+                t.daemon = True  # won't prevent B3 from exiting
+                t.start()
 
     ####################################################################################################################
     ##                                                                                                                ##
@@ -163,77 +247,41 @@ class LocationPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_CONNECT
         """
-        client = event.client
-        # if we already have location data
-        # for this client, don't bother
-        if client.isvar(self, 'location'):
-            return
+        def _threaded_on_connect(client):
 
-        # handling the event in a thread so B3 can pass that event to other plugins right away
-        t = Thread(target=self._threaded_on_connect, args=(client, ))
-        t.daemon = True  # won't prevent B3 from exiting
-        t.start()
+            data = None
 
-    def _threaded_on_connect(self, client):
-        # retrieve geolocation data
-        loc = self.getLocationData(client)
+            for c in self._locators:
 
-        if not loc:
-            # if we didn't manage to retrieve
-            # geolocation info just exit here
-            return
+                try:
+                    self.debug('retrieving location data for %s: %s' % (client.name, c._url % client.ip))
+                    data = c.getLocationData(client)
+                    self.debug("retrieved location data for %s: %r" % (client.name, data))
+                    break # stop iterating if we collect valid data
+                except Exception, e:
+                    self.warning('could not retrieve location data for %s using %s: %s' % (client.name, c._url % client.ip, e))
+                    data = None
 
-        # store data in the client object so we do
-        # not have to query the API on every request
-        client.setvar(self, 'location', loc)
+            if data:
+                client.setvar(self, 'location', data)
+                if self._settings['announce'] and self.console.upTime() > 300:
+                    if self._settings['verbose'] and 'city' in data:
+                        message = self.getMessage('connect_city', {'client': client.name, 'city': data['city'], 'country': data['country']})
+                    else:
+                        message = self.getMessage('connect', {'client': client.name, 'country': data['country']})
+                    self.console.say(message)
 
-        # if we have to announce and we got a valid response
-        # from the API, print location info in the game chat
-        if self._settings['announce'] and self.console.upTime() > 300:
-            if self._settings['verbose'] and 'city' in loc:
-                # if we got a proper city and we are supposed to display a verbose message
-                message = self.getMessage('connect_city', {'client': client.name,
-                                                           'city': loc['city'],
-                                                           'country': loc['country']})
-            else:
-                # just display basic geolocation info
-                message = self.getMessage('connect', {'client': client.name, 'country': loc['country']})
-
-            self.console.say(message)
+        if not event.client.isvar(self, 'location'):
+            # handling the event in a thread so B3 can pass that event to other plugins right away
+            t = Thread(target=_threaded_on_connect, args=(event.client, ))
+            t.daemon = True  # won't prevent B3 from exiting
+            t.start()
 
     ####################################################################################################################
     ##                                                                                                                ##
     ##   FUNCTIONS                                                                                                    ##
     ##                                                                                                                ##
     ####################################################################################################################
-
-    def getLocationData(self, client):
-        """
-        Retrieve location data from the API
-        """
-        try:
-            # will retrieve necessary data from the API and perform some checks on it
-            self.debug("contacting ip-api.com to retrieve location data for %s..." % client.name)
-            data = requests.get('http://ip-api.com/json/%s' % client.ip,
-                                timeout=LocationPlugin.LOCATION_API_TIMEOUT).json()
-        except RequestException, e:
-            self.warning("could not connect to ip-api.com: %s" % e)
-            return None
-            
-        if data['status'] == 'fail':
-            self.debug('could not retrieve valid geolocation info using ip %s: %s' % (client.ip, data['message']))
-            return None
-        
-        if 'country' not in data:
-            self.debug('could not establish in which country is ip %s' % client.ip)
-            return None
-
-        for index in data:
-            # additional check which replace/remove non-printable characters from retrieved data
-            data[index] = unicodedata.normalize('NFKD', data[index]).encode('ascii','ignore').strip()
-
-        self.debug("retrieved location data for %s: %r" % (client.name, data))
-        return data
 
     def getLocationDistance(self, cl1, cl2):
         """
@@ -302,16 +350,13 @@ class LocationPlugin(b3.plugin.Plugin):
         if not cl.isvar(self, 'location'):
             cmd.sayLoudOrPM(client, self.getMessage('locate_failed', {'client': cl.name}))
             return 
-        
-        # get the client location data
-        loc = cl.var(self, 'location').value
 
-        if self._settings['verbose'] and 'city' in loc:
-            # if we got a proper city and we are supposed to display a verbose message
-            msg = self.getMessage('locate_city', {'client': cl.name, 'city': loc['city'], 'country': loc['country']})
+        l = cl.var(self, 'location').value
+
+        if self._settings['verbose'] and 'city' in l:
+            msg = self.getMessage('locate_city', {'client': cl.name, 'city': l['city'], 'country': l['country']})
         else:
-            # just display basic geolocation info
-            msg = self.getMessage('locate', {'client': cl.name, 'country': loc['country']})
+            msg = self.getMessage('locate', {'client': cl.name, 'country': l['country']})
 
         cmd.sayLoudOrPM(client, msg)
 
@@ -336,9 +381,8 @@ class LocationPlugin(b3.plugin.Plugin):
         distance = self.getLocationDistance(client, cl)
         if not distance:
             cmd.sayLoudOrPM(client, self.getMessage('distance_failed', {'client': cl.name}))
-            return
-
-        cmd.sayLoudOrPM(client, self.getMessage('distance', {'client': cl.name, 'distance': distance}))
+        else:
+            cmd.sayLoudOrPM(client, self.getMessage('distance', {'client': cl.name, 'distance': distance}))
 
     def cmd_isp(self, data, client, cmd=None):
         """
@@ -354,8 +398,6 @@ class LocationPlugin(b3.plugin.Plugin):
 
         if not cl.isvar(self, 'location'):
             cmd.sayLoudOrPM(client, self.getMessage('isp_failed', {'client': cl.name}))
-            return
-
-        # get the client location data
-        loc = cl.var(self, 'location').value
-        cmd.sayLoudOrPM(client, self.getMessage('isp', {'client': cl.name, 'isp': loc['isp']}))
+        else:
+            l = cl.var(self, 'location').value
+            cmd.sayLoudOrPM(client, self.getMessage('isp', {'client': cl.name, 'isp': l['isp']}))
