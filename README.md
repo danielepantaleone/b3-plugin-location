@@ -15,11 +15,10 @@ Installation
 ------------
 
 * copy the `extplugins/location` directory into `b3/extplugins`
-* copy the `plugin_location.ini` file in `b3/extplugins/conf`
 * add to the `plugins` section of your `b3.xml` config file:
 
   ```xml
-  <plugin name="location" config="@b3/extplugins/conf/plugin_location.ini" />
+  <plugin name="location" config="@b3/extplugins/location/conf/plugin_location.ini" />
   ```
 
 In-game user guide
@@ -32,6 +31,11 @@ In-game user guide
 
 Changelog
 ---------
+### 1.15 - 2015/01/27 - Fenix
+- changed plugin to support multiple geolocation api
+- moved plugin configuration folder inside plugin directory
+- added new api support http://www.telize.com/
+
 ### 1.14 - 2014/09/12 - Fenix
 - make sure to remove/replace unprintable characters from location information
 
