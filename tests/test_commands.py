@@ -16,12 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-from mockito import when, any as ANY, unstub
+from mockito import when, any as ANY
 from b3.config import CfgConfigParser
 from textwrap import dedent
-from tests import LocationTestCase, FAKE_LOCATION_DATA
+from tests import LocationTestCase
+from tests import FAKE_LOCATION_DATA
 from tests import logging_disabled
 from location import LocationPlugin
+from location import IpApiLocator
+from location import TelizeLocator
 
 
 class Test_commands(LocationTestCase):
@@ -57,7 +60,8 @@ class Test_commands(LocationTestCase):
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        when(self.p).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
+        when(IpApiLocator).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
+        when(TelizeLocator).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
 
         with logging_disabled():
             from b3.fake import FakeClient
@@ -72,7 +76,6 @@ class Test_commands(LocationTestCase):
 
     def tearDown(self):
         LocationTestCase.tearDown(self)
-        unstub()
 
     ####################################################################################################################
     ##                                                                                                                ##

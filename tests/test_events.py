@@ -24,11 +24,13 @@ import sys
 
 from b3.config import CfgConfigParser
 from textwrap import dedent
-from tests import LocationTestCase, FAKE_LOCATION_DATA
+from tests import LocationTestCase
+from tests import FAKE_LOCATION_DATA
 from tests import logging_disabled
 from location import LocationPlugin
-from location import requests
 from location.requests.exceptions import Timeout
+from location import IpApiLocator
+from location import TelizeLocator
 
 
 class Test_events(LocationTestCase):
@@ -81,25 +83,27 @@ class Test_events(LocationTestCase):
         self.mike.ip = "8.8.8.8"
         # WHEN
         self.mike.connects("1")
-        time.sleep(LocationPlugin.LOCATION_API_TIMEOUT + .4)  # give a chance to the thread to do its job
+        time.sleep(6)  # give a chance to the thread to do its job
         # THEN
         self.assertEqual(True, self.mike.isvar(self.p, 'location'))
         print >> sys.stderr, "IP: %s, LOC: %r" % (self.mike.ip, self.mike.var(self.p, 'location').value)
 
     def test_event_client_connect(self):
         # GIVEN
-        when(self.p).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
+        when(IpApiLocator).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
+        when(TelizeLocator).getLocationData(ANY()).thenReturn(FAKE_LOCATION_DATA)
         # WHEN
         self.mike.connects("1")
-        time.sleep(.5)  # give a chance to the thread to do its job
+        time.sleep(1)  # give a chance to the thread to do its job
         # THEN
         self.assertEqual(True, self.mike.isvar(self.p, 'location'))
 
     def test_event_client_connect_API_timeout(self):
         # GIVEN
-        when(self.p).getLocationData(ANY()).thenRaise(Timeout())
+        when(IpApiLocator).getLocationData(ANY()).thenRaise(Timeout())
+        when(TelizeLocator).getLocationData(ANY()).thenRaise(Timeout())
         # WHEN
         self.mike.connects("1")
-        time.sleep(.5)  # give a chance to the thread to do its job
+        time.sleep(1)  # give a chance to the thread to do its job
         # THEN
         self.assertEqual(False, self.mike.isvar(self.p, 'location'))

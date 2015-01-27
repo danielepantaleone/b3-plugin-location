@@ -23,7 +23,7 @@ import logging
 import unittest2
 
 from mock import Mock
-from mockito import when
+from mockito import when, unstub
 from b3.config import XmlConfigParser
 from b3.plugins.admin import AdminPlugin
 from b3.update import B3version
@@ -88,3 +88,6 @@ class LocationTestCase(unittest2.TestCase):
         self.console.time = time.time
         self.console.upTime = Mock(return_value=3)
         self.console.cron.stop()
+
+    def tearDown(self):
+        unstub()
