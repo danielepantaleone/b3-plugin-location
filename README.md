@@ -3,34 +3,39 @@ Location Plugin for BigBrotherBot [![BigBrotherBot](http://i.imgur.com/7sljo4G.p
 
 Description
 -----------
-
-A [BigBrotherBot][B3] plugin which adds geolocation capabilities.
+A [BigBrotherBot][B3] plugin which introduces some new commands useful to display clients geolocation information. The 
+plugin can also be enabled to display a geowelcome message when a new player connects to the server.
 
 Download
 --------
-
 Latest version available [here](https://github.com/danielepantaleone/b3-plugin-location/archive/master.zip).
 
 Installation
 ------------
+Drop the `location` directory into `b3/extplugins`.  
+Load the plugin in your `b3.ini` or `b3.xml` configuration file:
+```xml
+<plugin>
+    <plugin name="location" config="@b3/extplugins/location/conf/plugin_location.ini" />
+</plugin>
+```
+```ini
+[plugins]
+location: @b3/extplugins/location/conf/plugin_location.ini
+```
 
-* copy the `extplugins/location` directory into `b3/extplugins`
-* add to the `plugins` section of your `b3.xml` config file:
-
-  ```xml
-  <plugin name="location" config="@b3/extplugins/location/conf/plugin_location.ini" />
-  ```
-
-In-game user guide
+Commands Reference
 ------------------
-
-* **!locate &lt;client&gt;** `display geolocation info of the specified client`
+* **!locate &lt;client&gt;** `display geolocation information of the specified client`
 * **!distance &lt;client&gt;** `display the world distance between you and the given client`
-* **!isp &lt;client&gt;** `display the isp the specified client is using`
+* **!isp &lt;client&gt;** `display the isp the given client is using to connect to the internet`
 
 
 Changelog
 ---------
+### 2.0 - 2015/03/13 - Fenix
+- rewrite the plugin from scratch and make it subplugin of the [Geolocation Plugin](https://github.com/danielepantaleone/b3-plugin-geolocation)
+
 ### 1.15 - 2015/01/27 - Fenix
 - changed plugin to support multiple geolocation api
 - moved plugin configuration folder inside plugin directory
