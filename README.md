@@ -10,6 +10,11 @@ Download
 --------
 Latest version available [here](https://github.com/danielepantaleone/b3-plugin-location/archive/master.zip).
 
+Requirements
+------------
+- B3 v1.10dev or greater
+- [Geolocation Plugin](https://github.com/danielepantaleone/b3-plugin-geolocation) plugin
+
 Installation
 ------------
 Drop the `location` directory into `b3/extplugins`.  
