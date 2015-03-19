@@ -60,3 +60,4 @@ If you have found a bug or have a suggestion for this plugin, please report it o
 [Support]: http://forum.bigbrotherbot.net/plugins-by-fenix/location-plugin "Support topic on the B3 forums"
 
 [![Build Status](https://travis-ci.org/danielepantaleone/b3-plugin-location.svg?branch=master)](https://travis-ci.org/danielepantaleone/b3-plugin-location)
+[![Code Health](https://landscape.io/github/danielepantaleone/b3-plugin-location/master/landscape.svg?style=flat)](https://landscape.io/github/danielepantaleone/b3-plugin-location/master)
