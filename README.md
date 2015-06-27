@@ -6,6 +6,10 @@ Description
 A [BigBrotherBot][B3] plugin which introduces some new commands useful to display clients geolocation information. The 
 plugin can also be enabled to display a geowelcome message when a new player connects to the server.
 
+******
+*NOTE: since B3 v1.10.1 beta this plugin has been included in the standard plugins set, thus all patches and updates will be performed in the official B3 repository.*
+******
+
 Download
 --------
 Latest version available [here](https://github.com/danielepantaleone/b3-plugin-location/archive/master.zip).
